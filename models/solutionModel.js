@@ -3,11 +3,18 @@ const { Schema, model } = require('mongoose')
 const solutionSchema = new Schema({
   quesId: {
     type: Number,
-    required: true
+    index: true,
+    required: true,
   },
   title: {
     type: String,
     maxLength: 100,
+    lowercase: true,
+    required: true
+  },
+  language: {
+    type: String,
+    maxLength: 10,
     lowercase: true,
     required: true
   },
@@ -17,10 +24,6 @@ const solutionSchema = new Schema({
   unacceptedSolutions : [{
     type: String
   }],
-  fileExtension: {
-    type: String,
-    required: true
-  },
   createdAt: {
     type: Date,
     immutable: true,

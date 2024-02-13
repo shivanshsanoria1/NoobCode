@@ -3,16 +3,17 @@ const fs = require('fs')
 
 const Solution = require('../models/solutionModel')
 
-async function storeFiles(solutionsDirPath, file){
+async function storeFiles(solutionsDirPath, fileName){
   return new Promise(async (resolve, reject) => {
     try{
-      const solutionFilePath = path.join(solutionsDirPath, file)
+      const solutionFilePath = path.join(solutionsDirPath, fileName)
 
-      const quesId = parseInt(file.split('.')[0])
-      const title = (file.split('.')[1]).split('_').join(' ')
-      const fileExtension = path.extname(solutionFilePath)
-      const isAccepted = file.search('TLE') === -1
-      //console.log(`${quesId} ${title} ${fileExtension} ${isAccepted}`)
+      const quesId = parseInt(fileName.split('.')[0])
+      const title = fileName.split('.')[1].split(' ')[0].split('_').join(' ')
+      const language = path.extname(solutionFilePath).substring(1)
+      const isAccepted = fileName.search('TLE') === -1
+      const fileNameWithoutExt = fileName.split('.')[1]
+      const version = parseInt(fileNameWithoutExt[fileNameWithoutExt.length - 2])
 
       const fileData = fs.readFileSync(solutionFilePath, 'utf8')
 
@@ -22,34 +23,29 @@ async function storeFiles(solutionsDirPath, file){
         solution = new Solution({
           quesId,
           title,
-          fileExtension,
+          language,
           acceptedSolutions: [],
           unacceptedSolutions: []
         })
         
         if(isAccepted){
-          solution.acceptedSolutions.push(fileData)
+          solution.acceptedSolutions[version - 1] = fileData
         }else{
-          solution.unacceptedSolutions.push(fileData)
+          solution.unacceptedSolutions[version - 1] = fileData
         }
-
       }else{ // update already existing solution
         solution.quesId = quesId
         solution.title = title
-        solution.fileExtension = fileExtension
+        solution.language = language
 
         if(isAccepted){
-          solution.acceptedSolutions = [...solution.acceptedSolutions, fileData]
-          //console.log(solution.acceptedSolutions)
+          solution.acceptedSolutions[version - 1] = fileData
         }else{
-          solution.unacceptedSolutions = [...solution.unacceptedSolutions, fileData]
-          //console.log(solution.unAcceptedSolutions)
+          solution.unacceptedSolutions[version - 1] =  fileData
         }
-
       }
-      await solution.save()
-      //console.log(solution.quesId)
       
+      await solution.save()
       resolve()
     }catch(err){
       console.log(err)
@@ -61,14 +57,20 @@ async function storeFiles(solutionsDirPath, file){
 
 exports.syncAllSolutions = async () => {
   try{
-    const solutionsDirPath = path.join(__dirname, '..', 'LeetcodeSolutions')
-    //console.log(solutionsDirPath)
+    const startTime = Date.now()
+    console.log(`File Sync Started at: ${new Date().toISOString()}`)
 
-    const files = fs.readdirSync(solutionsDirPath)
+    const solutionsDirPath = path.join(__dirname, '..', 'LeetcodeSolutions')
+
+    const fileNames = fs.readdirSync(solutionsDirPath)
     
-    for(const file of files){
-      await storeFiles(solutionsDirPath, file)
+    for(const fileName of fileNames){
+      await storeFiles(solutionsDirPath, fileName)
     }
+
+    console.log(`File Sync Completed at: ${new Date().toISOString()}`)
+    const endTime = Date.now()
+    console.log(`Time Taken to Sync Files = ${Math.ceil((endTime - startTime)/1000)} seconds`)
   }catch(err){
     console.log('SOLUTION SYNC FAILED')
     console.log(err)
