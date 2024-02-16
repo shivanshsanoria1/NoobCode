@@ -23,16 +23,9 @@ const solutionSchema = new Schema({
   }],
   unacceptedSolutions : [{
     type: String
-  }],
-  createdAt: {
-    type: Date,
-    immutable: true,
-    default: () => new Date()
-  },
-  updatedAt:{
-    type: Date,
-    default: () => new Date()
-  }
+  }]
+}, {
+  timestamps: true
 })
 
 /* solutionSchema.methods.getAcceptedSolutions = () => {

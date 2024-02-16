@@ -1,4 +1,4 @@
-const Solution = require('../models/solutionModel')
+const Solution = require('../models/solution')
 
 exports.getSolution = async (req, res) => {
   try{
@@ -11,7 +11,10 @@ exports.getSolution = async (req, res) => {
     const solution = await Solution.findOne({ quesId: ques_id })
 
     if(!solution){
-        res.status(200).json({ msg: "solution not found :("})
+        res.status(200).json({ 
+          found: false, 
+          msg: "solution not found :("
+        })
         return
     }
 
@@ -28,5 +31,6 @@ exports.getSolution = async (req, res) => {
   }catch(err){
     console.log('ERROR: solution not found')
     console.log(err)
+    res.status(500).json({ msg: 'Something went wrong' })
   }
 }
