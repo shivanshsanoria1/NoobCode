@@ -2,16 +2,21 @@ const SolutionStat = require('../models/SolutionStat')
 
 exports.getSolutionStats = async(req, res) => {
   try{
-    const { countCPP, countJS, countSQL } = await SolutionStat.findOne({})
+    const { countCPP, countJS, countSQL, partialCountCPP, quesIds } = await SolutionStat.findOne({})
 
     res.status(200).json({
-      cpp: countCPP,
-      js: countJS,
-      sql: countSQL
+      countCPP,
+      countJS,
+      countSQL,
+      partialCountCPP,
+      quesIds
     })
     
   }catch(err){
+    console.log('ERROR: getSolutionStats()')
     console.log(err)
-    res.status(500).json({ msg: 'Something went wrong' })
+    res.status(500).json({ 
+      msg: 'Something went wrong' 
+    })
   }
 }

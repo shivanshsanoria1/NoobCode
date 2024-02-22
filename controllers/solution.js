@@ -2,25 +2,30 @@ const Solution = require('../models/solution')
 
 exports.getSolution = async (req, res) => {
   try{
-    const ques_id = parseInt(req.params.ques_id)
-    if(isNaN(ques_id)){
-      res.status(400).json({ msg: 'Invalid Question Number' })
+    const ques_id = parseInt(req.query.ques_id)
+    // verify ques id is a integer
+    if(typeof ques_id !== 'number' || ques_id !== parseInt(ques_id)){
+      res.status(400).json({
+        found: false,
+        errMsg: 'Invalid Question Number' 
+      })
       return
     }
     
     const solution = await Solution.findOne({ quesId: ques_id })
 
     if(!solution){
-        res.status(200).json({ 
-          found: false, 
-          msg: "solution not found :("
-        })
-        return
+      res.status(404).json({ 
+        found: false, 
+        msg: "solution not found :("
+      })
+      return
     }
 
     const { quesId, title, language, acceptedSolutions, unacceptedSolutions } = solution
 
     res.status(200).json({
+      found: true,
       quesId,
       title,
       language,
@@ -29,8 +34,10 @@ exports.getSolution = async (req, res) => {
     })
 
   }catch(err){
-    console.log('ERROR: solution not found')
+    console.log('ERROR: getSolution()')
     console.log(err)
-    res.status(500).json({ msg: 'Something went wrong' })
+    res.status(500).json({ 
+      msg: 'Something went wrong' 
+    })
   }
 }
